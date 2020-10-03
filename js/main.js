@@ -1,59 +1,79 @@
 'use strict';
 
-// Находим карту
-var map = document.querySelector('.map');
-// Находим кнопкку отправить
-var submit = document.querySelector('.ad-form__submit');
-// Ищем шаблон
-var pinTemplate = document.querySelector('#pin').content;
-// Находим кнопку в шаблоне
-var mapPin = pinTemplate.querySelector('.map__pin');
-// Находим список меток
-var mapPins = document.querySelector('.map__pins');
+var type = ['palace', 'flat', 'house', 'bungalow'];
+var time = ['12:00', '13:00', '14:00'];
+var photos = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 
-map.classList.remove('map--faded');
 
-var getResult = function (title, address, type, rooms, guests, checkin, checkout, features, description, photos, maxWidth) {
+// Удаляет повторяющиеся значения
+function getUnique(arr) {
   var result = [];
 
-  for (var i = 1; i <= 8; i++) {
-    result[i] =
-    {
-      "author": {
-        "avatar": 'img/avatars/user0' + i + '.png'
-      },
-      "offer": {
-        "title": title,
-        "address": location.x + ', ' + location.y,
-        "type": type,
-        "rooms": rooms,
-        "guests": guests,
-        "checkin": checkin,
-        "checkout": checkout,
-        "features": features,
-        "description": description,
-        "photos": photos
-      },
-      "location": {
-        "x": Math.floor(Math.random() * maxWidth) + 1,
-        "y": Math.floor(Math.random() * (630 - 131)) + 130
-      }
-    };
+  for (let str of arr) {
+    if (!result.includes(str)) {
+      result.push(str);
+    }
   }
 
   return result;
+}
+
+// Рандомное число в от min до max
+var getRandom = function (min, max) {
+  var rand = min + Math.random() * (max + 1 - min);
+  return Math.floor(rand);
 };
 
-var result = getResult(1, 2, 3, 4, 6, 7, 8, 9, 10);
+// Массив строк случайной длинны
+var getArray = function (arr) {
+  var result = [];
+  result.length = getRandom(1, arr.length);
 
-
-submit.addEventListener('click', function (evt) {
-  evt.preventDefault();
-
-  for (var i = 1; i <= result.length; i++) {
-    var item = mapPin.cloneNode(true);
-    // mapPins.querySelector('.map__pin').style = ;
-    mapPin.querySelector('img').src = result[i].avatar;
-    mapPins.appendChild(item);
+  for (var i = 0; i <= result.length - 1; i++) {
+    result[i] = arr[getRandom(0, arr.length - 1)];
   }
-});
+
+  return getUnique(result);
+};
+
+// Создает объект
+var getResult = function (i) {
+
+  var object = {
+    location: {
+      x: Math.floor(Math.random() * (630 - 131)) + 130,
+      y: Math.floor(Math.random() * (630 - 131)) + 130
+    },
+    author: {
+      avatar: 'img/avatars/user0' + i + '.png'
+    },
+    offer: {
+      title: 'title',
+      address: location.x + ', ' + location.y,
+      type: type[getRandom(0, type.length - 1)],
+      rooms: getRandom(1, 4),
+      guests: getRandom(1, 8),
+      checkin: time[getRandom(0, time.length - 1)],
+      checkout: time[getRandom(0, time.length - 1)],
+      features: getArray(features),
+      description: 'description',
+      photos: getArray(photos)
+    }
+  };
+
+  return object;
+};
+
+// Создает массив объектов
+var getObject = function () {
+  var arrayObject = [];
+
+  for (var i = 0; i <= 7; i++) {
+    arrayObject[i] = getResult(i);
+  }
+
+  return arrayObject;
+};
+
+getObject();
