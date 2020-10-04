@@ -1,6 +1,12 @@
 'use strict';
 
-var OFFERS_COUNT = 8
+var OFFERS_COUNT = 8;
+
+var pinMetrics = {
+  width: 50,
+  height: 70
+};
+
 var map = document.querySelector('.map');
 var pinTemplate = document.querySelector('#pin').content;
 var mapPin = pinTemplate.querySelector('.map__pin');
@@ -12,49 +18,36 @@ var photos = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.g
 var features = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
 
 
-// Удаляет повторяющиеся значения
-function getUnique(arr) {
-  var result = [];
-
-  for (let str of arr) {
-    if (!result.includes(str)) {
-      result.push(str);
-    }
-  }
-
-  return result;
-}
-
 // Рандомное число в от min до max
 var getRandom = function (min, max) {
   var rand = min + Math.random() * (max + 1 - min);
   return Math.floor(rand);
 };
 
-// Массив строк случайной длинны
-var getArray = function (arr) {
+// Массив строк случайной длины
+function createCloneArray(lgth, target) {
+  var length = getRandom(1, target.length);
   var result = [];
-  result.length = getRandom(1, arr.length);
-
-  for (var i = 0; i <= result.length - 1; i++) {
-    result[i] = arr[getRandom(0, arr.length - 1)];
+  for (var i = 0; i < length; i++) {
+    let tmp = target[i];
+    let index = getRandom(i, length - 1);
+    let item = target[index];
+    target[i] = item;
+    target[index] = tmp;
+    result.push(item);
   }
-
-  return getUnique(result);
-};
+  return result;
+}
 
 // Создает объект
-var getResult = function (iterator) {
+var createPinModel = function (iterator) {
   var location = {
-    x: 600,
-    y: 350
+    x: getRandom(0, mapPins.offsetWidth),
+    y: getRandom(130, 630)
   };
 
-  var object = {
-    location: {
-      x: Math.floor(Math.random() * (630 - 131)) + 130,
-      y: Math.floor(Math.random() * (630 - 131)) + 130
-    },
+  return {
+    location: location,
     author: {
       avatar: 'img/avatars/user0' + iterator + '.png'
     },
@@ -66,47 +59,42 @@ var getResult = function (iterator) {
       guests: getRandom(1, 8),
       checkin: time[getRandom(0, time.length - 1)],
       checkout: time[getRandom(0, time.length - 1)],
-      features: getArray(features),
+      features: createCloneArray(getRandom(1, features.length), features), // getArray(features),
       description: 'описание',
-      photos: getArray(photos)
+      photos: createCloneArray(getRandom(1, photos.length), photos) // getArray(photos)
     }
   };
-
-  return object;
 };
 
 // Создает массив объектов
-var getObject = function () {
-  var arrayObject = [];
-
+var createPins = function () {
+  var result = [];
   for (var i = 1; i <= OFFERS_COUNT; i++) {
-    arrayObject[i] = getResult(i);
+    result.push(createPinModel(i));
   }
-
-  return arrayObject;
+  return result;
 };
 
-getObject();
-
-var newObject = getObject();
 
 map.classList.remove('map--faded');
 
 
-var addMapPin = function () {
+var createPinNode = function (model) {
+  var template = mapPin.cloneNode(true);
+  var image = template.querySelector('img');
+  image.src = model.author.avatar;
+  image.alt = model.offer.title;
+  template.style.left = model.location.x + (pinMetrics.width / 2) + 'px';
+  template.style.top = model.location.y + pinMetrics.height + 'px';
+  return template;
+};
+
+var renderPins = function () {
   var fragment = document.createDocumentFragment();
-
-  for(var i = 1; i <= OFFERS_COUNT; i++) {
-    var item = mapPin.cloneNode(true);
-    item.querySelector('img').src = newObject[i].author.avatar;
-    item.querySelector('img').alt = newObject[i].offer.title;
-    item.style.left = newObject[i].location.x + 50 / 2 + 'px;';
-    item.style.top = newObject[i].location.y + 70 + 'px;';
-    fragment.appendChild(item);
-  }
-
+  createPins().forEach(function (pin) {
+    fragment.appendChild(createPinNode(pin));
+  });
   mapPins.appendChild(fragment);
 };
 
-
-addMapPin();
+renderPins();
